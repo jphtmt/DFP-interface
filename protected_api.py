@@ -42,7 +42,7 @@ def get_rd():
 def params_map(platform=None):
     r = requests.get(url=get_base_url(
         config_path='H:\DFP-interface\config.yaml') + 'protected/paramsMap?platform=' + platform)
-    return json.loads(r.text)
+    return r.json()
 
 
 def compare_paramsmap(platform):
@@ -59,7 +59,7 @@ def global_stat():
     if r.status_code != 200:
         print "global_stat connection error"
     elif r.status_code == 200:
-        if json.loads(r.text)['stat']['invokerCount'] != 0:
+        if r.json()['stat']['invokerCount'] != 0:
             print json.loads(r.text)['stat']['invokerCount']
 
 
@@ -69,7 +69,7 @@ def daily_stat():
     if r.status_code != 200:
         print "daily_stat connection error"
     elif r.status_code == 200:
-        print json.loads(r.text)['default']
+        print r.json()['default']
         print " daily_stat success"
 
 
@@ -79,7 +79,7 @@ def dfp_about():
     if r.status_code != 200:
         print "dfp_about connection error"
     elif r.status_code == 200:
-        print json.loads(r.text)['version']
+        print r.json()['version']
         print "dfp_about success"
 
 
@@ -100,9 +100,18 @@ def view_key():
     if r.status_code != 200:
         print "view_key error"
     elif r.status_code == 200:
-        if json.loads(r.text)['public'] == config_public and json.loads(r.text)['private'] == config_private:
+        if r.json()['public'] == config_public and r.json()['private'] == config_private:
             print "view_key success"
 
+def health_check():
+    r = requests.get(url=get_base_url('H:\DFP-interface\config.yaml')+ 'protected/healthCheck')
+    if r.status_code != 200:
+        print "health check network error"
+    elif r.status_code == 200:
+        if r.json()["state"] is True:
+            print "health_check success"
+        if r.json()["state"] is False:
+            print "health check failed, can not connect to database"
 
 def main():
     get_preFetch()
@@ -115,8 +124,9 @@ def main():
     dfp_about()
     js_download()
     view_key()
-    
+    health_check()
+
 
 
 if __name__ == '__main__':
-    main()
+    view_key()
