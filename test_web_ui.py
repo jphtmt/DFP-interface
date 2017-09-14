@@ -16,20 +16,23 @@ def get_config(config_file='config.yaml'):
     application_yaml.close()
     return application['dfp.mongo']['host'], application['dfp.mongo']['port']
 
+def get_mongo_data(clean=True):
+    host, port = get_config()
+    client = MongoClient(host, port)
+    collection = client.dfp.dfp
+    mongo_data = collection.find_one()
+    if clean:
+        collection.delete_many({})
+    else:
+        pass
+    client.close()
+    return mongo_data
 
 @pytest.fixture()
 def base_capbility(request):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-gpu')
-    # if ua:
-    #     pass
-    # else:
-    #     chrome_options.add_argument('user-agent="asdfwevcsdgeft"')
-    # if language != 'zh-cn':
-    #     chrome_options.add_argument('lang=en-US')
-    # else:
-    #     chrome_options.add_argument('lang=zh-cn')
     driver = webdriver.Chrome(chrome_options=chrome_options,
                               executable_path=r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe")
 
@@ -74,20 +77,6 @@ def base_capbility_proxy(request):
 
     request.addfinalizer(fin)
     return driver
-
-
-def get_mongo_data(clean=True):
-    host, port = get_config()
-    client = MongoClient(host, port)
-    collection = client.dfp.dfp
-    mongo_data = collection.find_one()
-    if clean:
-        collection.delete_many({})
-    else:
-        pass
-    client.close()
-    return mongo_data
-
 
 @pytest.fixture()
 def base_capbility_language(request):
