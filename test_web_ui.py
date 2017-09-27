@@ -542,7 +542,7 @@ def test_ff_ua(ff_base_capbility, ff_base_capbility_ua):
     assert driver.find_element_by_xpath('//*[@id="inner"]').text != get_mongo_data()['dfp']
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_ff_incognito(ff_base_capbility, ff_base_capbility_incognito):
     driver = ff_base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
