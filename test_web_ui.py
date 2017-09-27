@@ -18,6 +18,7 @@ def get_config(config_file='config.yaml'):
     application_yaml.close()
     return application['dfp.mongo']['host'], application['dfp.mongo']['port']
 
+
 def get_mongo_data(clean=True):
     host, port = get_config()
     client = MongoClient(host, port)
@@ -29,6 +30,8 @@ def get_mongo_data(clean=True):
         pass
     client.close()
     return mongo_data
+
+
 class base_line:
     def __init__(self):
         self.url = None
@@ -37,9 +40,11 @@ class base_line:
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--lang=en-us')
         self.driver = webdriver.Chrome(chrome_options=chrome_options,
-                                  executable_path=r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe")
-    def set_url(self,url):
+                                       executable_path=r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe")
+
+    def set_url(self, url):
         self.url = url
+
     def setup(self):
         self.driver.get(self.url)
         try:
@@ -54,6 +59,7 @@ class base_line:
         self.driver.delete_all_cookies()
         self.driver.quit()
         return dfp
+
     def setup_timezone(self):
         call_powershell_timezone()
         self.driver.get(self.url)
@@ -69,9 +75,12 @@ class base_line:
         self.driver.delete_all_cookies()
         self.driver.quit()
         return dfp
+
     def mongo_teardown(self):
         call_powershell_timezone('-TimeZoneFriendlyName "China Standard Time"')
         get_mongo_data()
+
+
 @pytest.fixture()
 def base_capbility(request):
     # firefox_profile = webdriver.FirefoxProfile()
@@ -125,6 +134,7 @@ def base_capbility_proxy(request):
     request.addfinalizer(fin)
     return driver
 
+
 @pytest.fixture()
 def base_capbility_language(request):
     chrome_options = webdriver.ChromeOptions()
@@ -157,8 +167,6 @@ def base_capbility_plugins(request):
     return driver
 
 
-
-
 @pytest.fixture()
 def base_capbility_incognito(request):
     chrome_options = webdriver.ChromeOptions()
@@ -176,6 +184,7 @@ def base_capbility_incognito(request):
     request.addfinalizer(fin)
     return driver
 
+
 @pytest.fixture()
 def ff_base_capbility(request):
     binary = FirefoxBinary()
@@ -188,6 +197,7 @@ def ff_base_capbility(request):
 
     request.addfinalizer(fin)
     return driver
+
 
 @pytest.fixture()
 def ff_base_capbility_ua(request):
@@ -202,11 +212,14 @@ def ff_base_capbility_ua(request):
     request.addfinalizer(fin)
     return driver
 
+
 @pytest.fixture()
 def ff_base_capbility_incognito(request):
     profile = webdriver.FirefoxProfile()
     profile.set_preference("browser.privatebrowsing.autostart", True)
-    driver = webdriver.Firefox(profile, executable_path=r"D:\geckodriver.exe")
+    binary = FirefoxBinary()
+    binary.add_command_line_options('-headless')
+    driver = webdriver.Firefox(profile, firefox_binary=binary, executable_path=r"D:\geckodriver.exe")
 
     def fin():
         print "browser close"
@@ -214,6 +227,7 @@ def ff_base_capbility_incognito(request):
 
     request.addfinalizer(fin)
     return driver
+
 
 @pytest.fixture()
 def ff_base_capbility_language(request):
@@ -228,7 +242,8 @@ def ff_base_capbility_language(request):
     request.addfinalizer(fin)
     return driver
 
-@pytest.mark.skip()
+
+# @pytest.mark.skip()
 def test_get_normall(base_capbility):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -241,7 +256,8 @@ def test_get_normall(base_capbility):
         time.sleep(3)
     assert driver.get_cookie(name='BSFIT_OkLJUJ')['value'] == get_mongo_data()['dfp']
 
-@pytest.mark.skip()
+
+# @pytest.mark.skip()
 def test_delete_cookie(base_capbility):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -277,7 +293,7 @@ def test_timezone():
     assert dfp_after != dfp_before
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_screnn_size(base_capbility):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -302,8 +318,7 @@ def test_screnn_size(base_capbility):
     assert driver.get_cookie(name='BSFIT_OkLJUJ')['value'] == get_mongo_data()['dfp']
 
 
-
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_ua(base_capbility, base_capbility_ua):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -330,7 +345,7 @@ def test_ua(base_capbility, base_capbility_ua):
     assert driver.find_element_by_xpath('//*[@id="inner"]').text != get_mongo_data()['dfp']
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_language(base_capbility, base_capbility_language):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -357,7 +372,7 @@ def test_language(base_capbility, base_capbility_language):
     assert driver.find_element_by_xpath('//*[@id="inner"]').text == get_mongo_data(clean=False)['dfp']
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_incognito(base_capbility, base_capbility_incognito):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -411,7 +426,7 @@ def test_proxy(base_capbility, base_capbility_proxy):
     assert driver.find_element_by_xpath('//*[@id="inner"]').text == get_mongo_data()['dfp']
 
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_no_plugins(base_capbility, base_capbility_plugins):
     driver = base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
@@ -435,7 +450,8 @@ def test_no_plugins(base_capbility, base_capbility_plugins):
     except TimeoutException:
         driver.refresh()
         time.sleep(3)
-    assert driver.find_element_by_xpath('//*[@id="inner"]').text == get_mongo_data(clean=False)['dfp']
+    assert driver.find_element_by_xpath('//*[@id="inner"]').text == get_mongo_data()['dfp']
+
 
 @pytest.mark.skip()
 def test_ff_get_normall(ff_base_capbility):
@@ -449,6 +465,7 @@ def test_ff_get_normall(ff_base_capbility):
         driver.refresh()
         time.sleep(3)
     assert driver.get_cookie(name='BSFIT_OkLJUJ')['value'] == get_mongo_data()['dfp']
+
 
 @pytest.mark.skip()
 def test_ff_delete_cookie(ff_base_capbility):
@@ -471,6 +488,7 @@ def test_ff_delete_cookie(ff_base_capbility):
         driver.refresh()
         time.sleep(3)
     assert driver.get_cookie(name='BSFIT_OkLJUJ')['value'] == get_mongo_data()['dfp']
+
 
 @pytest.mark.skip()
 def test_ff_screnn_size(ff_base_capbility):
@@ -495,6 +513,7 @@ def test_ff_screnn_size(ff_base_capbility):
         driver.refresh()
         time.sleep(3)
     assert driver.get_cookie(name='BSFIT_OkLJUJ')['value'] == get_mongo_data()['dfp']
+
 
 @pytest.mark.skip()
 def test_ff_ua(ff_base_capbility, ff_base_capbility_ua):
@@ -522,7 +541,8 @@ def test_ff_ua(ff_base_capbility, ff_base_capbility_ua):
         time.sleep(3)
     assert driver.find_element_by_xpath('//*[@id="inner"]').text != get_mongo_data()['dfp']
 
-# @pytest.mark.skip()
+
+@pytest.mark.skip()
 def test_ff_incognito(ff_base_capbility, ff_base_capbility_incognito):
     driver = ff_base_capbility
     url = "http://10.100.1.53:9080/public/index.html"
